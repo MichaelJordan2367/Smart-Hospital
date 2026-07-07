@@ -90,17 +90,17 @@ st.header("Symptoms")
 col1, col2 = st.columns(2)
 
 with col1:
-  fever = st.checkbox("Fever")
-  cough = st.checkbox("Cough")
-  headache = st.checkbox("Headache")
-  chest_pain = st.checkbox("Chest Pain")
-  stomach_pain = st.checkbox("Stomach pain")
+  fever = st.checkbox("Fever🤒")
+  cough = st.checkbox("Cough😷")
+  headache = st.checkbox("Headache🙆‍♂️")
+  chest_pain = st.checkbox("Chest Pain💘")
+  stomach_pain = st.checkbox("Stomach pain🫃")
 
 with col2:
-  shortness_breath = st.checkbox("Shortness Of Breath")
-  nausea_vomiting = st.checkbox("Nause / Vomiting")
-  dizziness = st.checkbox("dizziness")
-  skin_rash = st.checkbox("Skin Rash")
+  shortness_breath = st.checkbox("Shortness Of Breath😤")
+  nausea_vomiting = st.checkbox("Nause / Vomiting🤮")
+  dizziness = st.checkbox("dizziness🥴")
+  skin_rash = st.checkbox("Skin Rash🔴")
 
 
 st.header("Patient Condition")
