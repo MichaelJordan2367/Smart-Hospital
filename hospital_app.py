@@ -2,15 +2,13 @@ import streamlit as st
 import pandas as pd
 import pickle
 
-#untuk membuka model
-with open("hospital_model.pkl","rb") as f:
+with open("hospital_model.pkl", "rb") as f:
   bundle = pickle.load(f)
-  st.write("conected") 
+  st.write("Connected")
 
-#untuk impor model
 model = bundle["model"]
 scaler = bundle["scaler"]
-#memanggil features
+
 features = bundle["features"]
 cols_to_scale = bundle["cols_to_scale"]
 
@@ -22,19 +20,20 @@ hr_map = bundle["hr_map"]
 dur_map = bundle["dur_map"]
 cc_map = bundle["cc_map"]
 
+
+
 DEPT_INFO = {
     "Respiratory Medicine": {
- "icon": "🫁",
-
+        "icon": "🫁",
         "desc": "Specialises in conditions affecting the lungs and airways.",
-  "next": [
+        "next": [
             "Visit Level 2, Wing B",
- "Estimated wait: 15–25 minutes",
+            "Estimated wait: 15–25 minutes",
             "Please wear a mask"
         ]
     },
 
-   "Cardiology": {
+    "Cardiology": {
         "icon": "❤️",
         "desc": "Specialises in heart and cardiovascular conditions.",
         "next": [
@@ -44,7 +43,7 @@ DEPT_INFO = {
         ]
     },
 
-   "Gastroenterology": {
+    "Gastroenterology": {
         "icon": "🫃",
         "desc": "Specialises in digestive system conditions.",
         "next": [
@@ -53,7 +52,7 @@ DEPT_INFO = {
         ]
     },
 
-   "Neurology": {
+    "Neurology": {
         "icon": "🧠",
         "desc": "Specialises in brain and nervous system conditions.",
         "next": [
@@ -62,7 +61,7 @@ DEPT_INFO = {
         ]
     },
 
-  "General Medicine": {
+    "General Medicine": {
         "icon": "🩺",
         "desc": "General health consultation.",
         "next": [
@@ -70,17 +69,16 @@ DEPT_INFO = {
         ]
     },
 
-  "Dermatology": {
-        "icon": "👨",
+    "Dermatology": {
+        "icon": "🔬",
         "desc": "Specialises in skin conditions.",
         "next": [
             "Visit Level 2, Wing D"
         ]
     }
 }
-#creating the dashboard
 
-st.title("🏥 Smart Hospital Navigator Jordan")
+st.title("🏥 Smart Hospital Navigator")
 st.write("Fill in the patient's information below")
 
 st.header("Patient Information")
@@ -88,20 +86,22 @@ age = st.number_input("Age" , min_value=1, max_value=120, value=30)
 gender = st.selectbox("Gender", ["Female", "Male"])
 
 st.header("Symptoms")
+
 col1, col2 = st.columns(2)
 
 with col1:
-  fever = st.checkbox("Fever🤒")
-  cough = st.checkbox("Cough😷")
-  headache = st.checkbox("Headache🙆‍♂️")
-  chest_pain = st.checkbox("Chest Pain💔")
-  stomach_pain = st.checkbox("Stomach pain🤢")
+  fever = st.checkbox("Fever")
+  cough = st.checkbox("Cough")
+  headache = st.checkbox("Headache")
+  chest_pain = st.checkbox("Chest Pain")
+  stomach_pain = st.checkbox("Stomach pain")
 
 with col2:
-  shortness_breath = st.checkbox("Shortness Of Breath😤")
-  nausea_vomiting = st.checkbox("Nause / Vomiting🤮")
-  dizziness = st.checkbox("dizziness😵‍💫")
-  skin_rash = st.checkbox("Skin Rash🔴")
+  shortness_breath = st.checkbox("Shortness Of Breath")
+  nausea_vomiting = st.checkbox("Nause / Vomiting")
+  dizziness = st.checkbox("dizziness")
+  skin_rash = st.checkbox("Skin Rash")
+
 
 st.header("Patient Condition")
 
@@ -125,6 +125,10 @@ chief_complaint = st.selectbox(
     options=list(cc_map.keys())
 )
 
+# ===============================
+# MEDICAL HISTORY
+# ===============================
+
 st.header("Medical History")
 
 hypertension = st.checkbox("Hypertension")
@@ -133,7 +137,16 @@ heart_disease = st.checkbox("Heart Disease")
 
 asthma = st.checkbox("Asthma")
 
+# ===============================
+# PREDICT BUTTON
+# ===============================
+
 predict_button = st.button("Predict Department")
+
+# ===============================
+# MAKE PREDICTION
+# ===============================
+
 if predict_button:
 
     # Create patient data
@@ -141,7 +154,7 @@ if predict_button:
         "age": age,
         "gender": gender_map[gender],
 
-      "fever": int(fever),
+        "fever": int(fever),
         "cough": int(cough),
         "headache": int(headache),
         "chest_pain": int(chest_pain),
@@ -151,7 +164,7 @@ if predict_button:
         "dizziness": int(dizziness),
         "skin_rash": int(skin_rash),
 
-      "temperature_level": temp_map[temperature_level],
+        "temperature_level": temp_map[temperature_level],
         "heart_rate_level": hr_map[heart_rate_level],
         "duration": dur_map[duration],
 
@@ -162,39 +175,51 @@ if predict_button:
         "chief_complaint": cc_map[chief_complaint]
     }])
 
- patient_scaled = patient.copy()
+    # Scale numerical features
+    patient_scaled = patient.copy()
 
     patient_scaled[cols_to_scale] = scaler.transform(
         patient[cols_to_scale]
     )
 
- prediction = model.predict(
+    # Predict department
+    prediction = model.predict(
         patient_scaled[features]
     )[0]
 
- probability = model.predict_proba(
+    # Predict confidence
+    probability = model.predict_proba(
         patient_scaled[features]
     )[0]
 
- department = dept_map_inv[prediction]
+    department = dept_map_inv[prediction]
 
     confidence = probability[prediction] * 100
 
-st.header("Prediction Result")
+    # ===============================
+    # SHOW RESULT
+    # ===============================
+
+    st.divider()
+
+    st.header("Prediction Result")
 
     info = DEPT_INFO.get(department)
 
     if info:
-st.success(
+
+        st.success(
             f"{info['icon']} Recommended Department: {department}"
         )
- st.write(f"**Confidence:** {confidence:.1f}%")
+
+        st.write(f"**Confidence:** {confidence:.1f}%")
 
         st.write("### Description")
         st.write(info["desc"])
-    st.write("### What should the patient do?")
 
- for step in info["next"]:
+        st.write("### What should the patient do?")
+
+        for step in info["next"]:
             st.write(f"✅ {step}")
 
     else:
@@ -206,5 +231,14 @@ st.success(
     st.warning(
         "This AI recommendation is only for educational purposes and is not a medical diagnosis."
     )
+
+
+
+
+
+
+
+
+
 
 
